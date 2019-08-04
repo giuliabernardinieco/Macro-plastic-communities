@@ -2,7 +2,7 @@
 rm(list=ls())
 #working directory
 getwd()
-setwd("C:/Users/Giulia/Desktop/Imperial MSc/projects/plastic/data")
+setwd("C:/Users/Giulia/Desktop/Imperial MSc/projects/plastic/data/Git")
 #required packages
 if (!require(dplyr)) {install.packages('dplyr'); library(dplyr)}
 if (!require(lattice)) {install.packages('lattice'); library(lattice)}
@@ -31,7 +31,7 @@ if (!require(ggrepel)) {install.packages('ggrepel'); library(ggrepel)}
 ###Cleaning the dataset================================================================================
 
 #importing the dataset
-data<-read.csv("JustplasticitemsWhole.csv") #this dataset was edited via excel from the raw data obtained from Thames21
+data<-read.csv("cleaned-data.csv") #this dataset was edited via excel from the raw data obtained from Thames21
 str(data)                              #I removed all the object counted that where not made of plastic, such as tins
 head(data)
 tail(data)
