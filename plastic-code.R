@@ -25,19 +25,30 @@ if (!require(lubridate)) {install.packages('lubridate'); library(lubridate)}
 if (!require(FSA)) {install.packages('FSA'); library(FSA)}
 if (!require(reshape2)) {install.packages('reshape2'); library(reshape2)}
 if (!require(ggrepel)) {install.packages('ggrepel'); library(ggrepel)}
+if (!require(Kendall)) {install.packages('Kendall'); library(Kendall)}
 
 #to cite use: citation(package = "package to cite")
 
 ###Cleaning the dataset================================================================================
 
+#I hereby declare that the data used was collected by citizen scientists from 2015 to 2018. 
+#The data was provided to me by the organisation as an MS Excel file and I am responsible 
+#for the data wrangling, cleaning, and the analysis performed by R. 
+#The R script used was composed by me.
+
+#because the data are owned by the organisation the data used with this R script is generated through R 
+#and the confidential information are removed. 
+#Hence, the results obtained by running this R script with dummy-data.csv are not representative of the reality.
+
+
 #importing the dataset
-data<-read.csv("cleaned-data.csv") #this dataset was edited via excel from the raw data obtained from Thames21
-str(data)                              #I removed all the object counted that where not made of plastic, such as tins
+data<-read.csv("dummy-data.csv") #the original dataset was edited via excel from the raw data obtained by the organisation.
+str(data)                       #I removed all the object counted that where not made of plastic, such as tins
 head(data)
 tail(data)
-#View(data)
+View(data)
 
-#deleting some reduntant coloumn 
+#removing some reduntant coloumn 
 d1<-data[,-c(2:9)]
 d<-d1[,-c(4:15)]
 rm(d1, data)
@@ -45,7 +56,7 @@ rm(d1, data)
 #deleting only-wet wipes observation and quadrats not surveyed
 d<-d%>%filter(Other.litter!="No wet wipes; other litter not included in survey")%>%filter(Other.litter!="Only wet wipes surveyed")%>%filter(Other.litter!="No wet wipes present")%>%filter(Surveyed.!="Not surveyed", Surveyed.!="No litter")
 
-#Thames21 instead of using 0 used empty cells so now I am changing NA to 0
+#Originally the organisation instead of using 0 used empty cells so now I am changing NA to 0
 d[is.na(d)]<-0
 
 #creating a new variable Plastic Items per m2 that sum all the plastic items present in quadrat
@@ -66,14 +77,14 @@ d<-filter(d, Year!=2015)
 
 #top items
 topitems<-as.data.frame(apply(d[8:79], 2, FUN=sum))
-#I am going to remove items not present:
-#Other.polystyrene.food.packaging
-#Commercial.fishing.gear
-#Shopping.trolley
-#Tyre
-#Large.appliance..fridge..washing.machine....
-#Small.appliance..toaster..microwave....
-#Mattress
+#I am going to remove items not present (in the original dataset):
+  #Other.polystyrene.food.packaging
+  #Commercial.fishing.gear
+  #Shopping.trolley
+  #Tyre
+  #Large.appliance..fridge..washing.machine....
+  #Small.appliance..toaster..microwave....
+  #Mattress
 d$Other.polystyrene.food.packaging<-NULL
 d$Commercial.fishing.gear<-NULL
 d$Shopping.trolley<-NULL
@@ -82,7 +93,7 @@ d$Large.appliance..fridge..washing.machine....<-NULL
 d$Small.appliance..toaster..microwave....<-NULL
 d$Mattress<-NULL
 
-#changin the name of the variables, because very long
+#changin colnames, because very long and not practical
 colnames(d)[colnames(d)=="Cutlery..plastic."] <- "Cutlery"
 colnames(d)[colnames(d)=="Lollipop.stick"] <- "Lol.Stick"
 colnames(d)[colnames(d)=="Food.wrapper"] <- "F.wrap"
@@ -193,14 +204,10 @@ bar2<-ggplot(data=Summarymean, aes(x=Site.Name.dist, y=PlasticItems_m2, fill=Yea
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_brewer(palette="Dark2")+
   ggtitle("")+xlab("Site") + ylab("Mean Plastic Items per quadrat")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))
+
 #in these graphs the sites are ordered from the more distant from the estuary to the one closer.
 
-
-#to make the bar2 looks better we want to add white spaces where the missing data are. to do so I am 
-#going to work on the dataframe
-
-
-
+#COMPOSITION by year
 #Now I am looking at the composition per each year (in terms of relative aboundance (item i/tot items *100))
 #dataframe of the composition in 2016
 
@@ -421,7 +428,7 @@ prob.table(cooccur.items)
 #now a plot to visualize
 dev.off()
 plot(cooccur.items)
-# I want to chnage colors of the graphs, because it is a funcion of the package I have found the function and changed the colors
+#I want to chnage colors of the graphs, because it is a funcion of the package I have found the function on https://github.com/cran/cooccur/blob/master/R/plot.cooccur.R and changed the colors
 plot.Items<-
   function(x, ...){
     
@@ -596,7 +603,7 @@ plot.Items<-
 dev.off()
 
 
-plot.Items(cooccur.items)
+plot.Items(cooccur.items) #with the dummy dataset this is not working because i have no positive nor negative interactions
 
 #visualize the interaction of one species in detail
 pair(mod = cooccur.items, " C.bud.stick")
@@ -707,7 +714,7 @@ pvpick(clu2)
 bc2.nmds<-metaMDS(RELABcommunity, distance = "bray", k=2) 
 
 #checking the stress
-bc2.nmds$stress #very good value
+bc2.nmds$stress #very good value with the real dataset
 
 #creating dataframe to be used to see the different groups and test with bootstraping
 NMDSdata<-rownames_to_column(RELABcommunity, var = "Var1")
@@ -715,7 +722,7 @@ NMDSdata<-merge(NMDSdata,sitestable, by="Var1")
 #Bootstrapping and testing for an actual difference between the groups with adonis (vegan package)
 #adonis allows to perform permutational multivariate analysis of variance using distance matrices 
 fit <- adonis(RELABcommunity ~ Site.type, data=NMDSdata, permutations=1000, method="bray")
-fit #our groups are very different from eachother, it is significant
+fit #our groups in the real dataset are very different from eachother, it is significant
 
 ##it works by first finding the centroids for each group and then calculates the squared deviations 
 #of each of site to that centroid. Then significance tests are performed using F-tests based on sequential 
@@ -743,7 +750,7 @@ hull.data
 #plotting
 ggplot() + 
   geom_polygon(data=hull.data,aes(x=NMDS1,y=NMDS2,fill=grp,group=grp), alpha=0.30) + # add the convex hulls
-  geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5, check_overlap = T) +# add the species labels
+  geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5, check_overlap = T) + # add the species labels, this remove all the species that overlap
   geom_point(data=data.scores,aes(x=NMDS1,y=NMDS2,shape=grp,colour=grp),size=4) + # add the point markers
   scale_colour_manual(values=c("Sinking" = "#66A61E", "Floating" = "#E7298A")) +
   scale_fill_manual(values=c("Sinking" = "#66A61E", "Floating" = "#E7298A"))+
@@ -931,9 +938,6 @@ grid.arrange(Htype,Stype,legend,widths=c(2.3, 2.3, 1))
 bsitedf<-as.data.frame(t(RELABcommunity))
 bsitedf<-rownames_to_column(bsitedf, var= "Item")
 bsitedf <- bsitedf %>%tidyr::gather(key = "Site.Name", value = "Abudance", -Item)
-#bsitedf<-bsitedf%>%subset(Site.Name!="Battersea Bridge")%>%filter(Site.Name!="Bermondsey")%>%
-  #filter(Site.Name!="Millwall Drawdock")%>%filter(Site.Name!="Newcastle Drawdock")%>%
-  #filter(Site.Name!="Vauxhall Bridge")
 bsitedf$type=ifelse(bsitedf$Site.Name==c("Newcastle Drawdock"),"Sinking","Floating")
 bsitedf$type[bsitedf$Site.Name == "Hammersmith Bridge"] <- "Sinking"
 bsitedf$type[bsitedf$Site.Name == "Battersea Bridge"] <- "Sinking"
@@ -1057,8 +1061,6 @@ ggplot(dat2f, aes(x=Year, y=Richness)) +
   geom_boxplot()+theme_minimal()+ labs(y="Richness", x = "year")
 
 
-
-
 ###Indicator items using the package indispecies==============================================================
 
 #This Package consider the the differences between group of sites and gives you a list of indicator species
@@ -1095,6 +1097,7 @@ indvalR$sign
 #When using multipatt it is possible to avoid considering site group combinations, as in the original method, 
 #by using duleg = TRUE
 indvalori<-multipatt(community, group, duleg=T, control = how(nperm=999))
+
 summary(indvalori)
 summary(indvalori, indvalcomp=TRUE)
 indvalori$sign
@@ -1144,12 +1147,13 @@ anova(mm.red,mm)
 #variation and we cannot conclude that there in no significative changese in the plastic items amount 
 
 
+#many might argue that it is better to use Mann-Kendall test
 #mann kendall test
-install.packages("Kendall")
-require(Kendall)
 MKpp1<-SeasonalMannKendall(as.ts(LMMdata$PlasticItems_m2))
 summary(MKpp1)
+
 #this test has as assumption that there is not bias data. Our data are most likely biased and pseudoreplicated, 
 #for this reason I do not think that this test is the best to use. The LMM allows to correct the pseudoreplication of the sites. 
 #anyway the result of the M-K is not significant and the tau is positive, all of this is coherent with the results of the LMM
-#Moreover, M-K is a non-parametic test, and our data are sliglty skewed. The LMM diagnostic plots are accetable.
+#Moreover, M-K is a non-parametic test, and our data are sliglty skewed. 
+#The LMM diagnostic plots are accetable and the LMM is considered more powerful because it take into consideration the pseudoreplication.
