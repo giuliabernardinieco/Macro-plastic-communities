@@ -1,9 +1,12 @@
-#House keeping
+
+# House keeping
 rm(list=ls())
-#working directory
+
+# Working directory
 getwd()
 setwd("C:/Users/Giulia/Desktop/Imperial MSc/projects/plastic/data/Git")
-#required packages
+
+# Required packages
 if (!require(dplyr)) {install.packages('dplyr'); library(dplyr)}
 if (!require(lattice)) {install.packages('lattice'); library(lattice)}
 if (!require(tibble)) {install.packages('tibble'); library(tibble)}
@@ -27,64 +30,72 @@ if (!require(reshape2)) {install.packages('reshape2'); library(reshape2)}
 if (!require(ggrepel)) {install.packages('ggrepel'); library(ggrepel)}
 if (!require(Kendall)) {install.packages('Kendall'); library(Kendall)}
 
-#to cite use: citation(package = "package to cite")
-
-###Cleaning the dataset================================================================================
-
-#I hereby declare that the data used was collected by citizen scientists from 2015 to 2018. 
-#The data was provided to me by the organisation as an MS Excel file and I am responsible 
-#for the data wrangling, cleaning, and the analysis performed by R. 
-#The R script used was composed by me.
-
-#because the data are owned by the organisation the data used with this R script is generated through R 
-#and the confidential information are removed. 
-#Hence, the results obtained by running this R script with dummy-data.csv are not representative of the reality.
+#to view citation: citation(package = "package name")
 
 
-#importing the dataset
-data<-read.csv("dummy-data.csv") #the original dataset was edited via excel from the raw data obtained by the organisation.
-str(data)                       #I removed all the object counted that where not made of plastic, such as tins
+# The data for this project was collected by citizen scientists from 2015 to 2018. 
+# The data was provided to me by the organisation, I was working with, as an MS Excel file and I am responsible 
+# for the data wrangling, cleaning, and the analysis performed by R. 
+# The R script used was composed by me.
+
+#BUT
+
+# because the data is owned by the organisation the data used with this R script on github (dummy-data.csv) 
+# is a mock dataset generated through R and the confidential information are chnaged or removed. 
+# Hence, the results obtained by running this R script with dummy-data.csv are not representative of the reality.
+# the comments about results or statistical analyses are related to the original data and results and they might 
+# not be meaninful with the dummy-data
+
+
+### Cleaning the dataset================================================================================
+
+# Importing the dataset
+data<-read.csv("dummy-data.csv") # The original dataset was edited via excel from the raw data obtained by the organisation.
+str(data)                       # I removed by Excel all the object counted that where not made of plastic, such as tins or wood object
 head(data)
 tail(data)
-View(data)
+# View(data)  # To open the dataset in a new tab
 
-#removing some reduntant coloumn 
+# Removing some reduntant coloumn 
 d1<-data[,-c(2:9)]
 d<-d1[,-c(4:15)]
-rm(d1, data)
 
-#deleting only-wet wipes observation and quadrats not surveyed
+# Trying to keep the R environment cleaner as possible removing dataframes I do not need anymore
+rm(d1, data)  # Be aware that this command will give you an error "Error in names(frame) <- `*vtmp*` : names() applied to a non-vector" 
+              # if and only if the View(data) tab is still open in Rstudio.
+
+
+# Deleting only-wet wipes observation and quadrats not surveyed
 d<-d%>%filter(Other.litter!="No wet wipes; other litter not included in survey")%>%filter(Other.litter!="Only wet wipes surveyed")%>%filter(Other.litter!="No wet wipes present")%>%filter(Surveyed.!="Not surveyed", Surveyed.!="No litter")
 
-#Originally the organisation instead of using 0 used empty cells so now I am changing NA to 0
+# Originally the organisation instead of using 0 used empty cells so now I am changing NA to 0
 d[is.na(d)]<-0
 
-#creating a new variable Plastic Items per m2 that sum all the plastic items present in quadrat
+# Creating a new variable Plastic Items per m2 that will sum all the plastic items present in a quadrat (1 m2 of surface)
 d$PlasticItems_m2<-apply(d[,8:79], 1, sum)
-##I added a coloum with the number of plastic items per square m, 
-#to do this I have just summed all the plastic, mixed and tetrapak items 
-#founded in that quadrat (1 m2 of surface).
 
-#adding the year to each observation
+
+# Adding a variable with only the year to each observation
 d$Year<-d$Recorded..Date
 d$Year<-substring(d$Year,7,10)
 
-#plastictems per m2 per years
+# Plastictems per m2 per years
 boxplot(d$PlasticItems_m2~d$Year)
 
-#we decided we don't want to use the data from 2015 because it was a pilot study
+# We decided we don't want to use data collected in 2015 because it was a pilot study and of low quality data collection 
 d<-filter(d, Year!=2015)
 
-#top items
+# Top items in the river
 topitems<-as.data.frame(apply(d[8:79], 2, FUN=sum))
-#I am going to remove items not present (in the original dataset):
-  #Other.polystyrene.food.packaging
-  #Commercial.fishing.gear
-  #Shopping.trolley
-  #Tyre
-  #Large.appliance..fridge..washing.machine....
-  #Small.appliance..toaster..microwave....
-  #Mattress
+
+# I am going to remove items not present (in the original dataset):
+  # Other.polystyrene.food.packaging
+  # Commercial.fishing.gear
+  # Shopping.trolley
+  # Tyre
+  # Large.appliance..fridge..washing.machine....
+  # Small.appliance..toaster..microwave....
+  # Mattress
 d$Other.polystyrene.food.packaging<-NULL
 d$Commercial.fishing.gear<-NULL
 d$Shopping.trolley<-NULL
@@ -93,7 +104,7 @@ d$Large.appliance..fridge..washing.machine....<-NULL
 d$Small.appliance..toaster..microwave....<-NULL
 d$Mattress<-NULL
 
-#changin colnames, because very long and not practical
+# Changin colnames, because very long and not practical
 colnames(d)[colnames(d)=="Cutlery..plastic."] <- "Cutlery"
 colnames(d)[colnames(d)=="Lollipop.stick"] <- "Lol.Stick"
 colnames(d)[colnames(d)=="Food.wrapper"] <- "F.wrap"
@@ -142,44 +153,47 @@ colnames(d)[colnames(d)=="Gardening..flower.pot..gloves..plant.label."] <- "Gard
 colnames(d)[colnames(d)=="Packaging.peanut"] <- "Peanut.pack"
 
 
-
-
 ###First glance at the data =====================================================================================================
 
-#How many quasrats per year?
-#How may plastic Items per year?
-#Mean of plastic Items per m2 per each year?
+# How many quasrats per year?
+# How may plastic Items per year?
+# Mean of plastic Items per m2 per each year?
+
 Yearsummary<-d%>%group_by(Year)%>%summarise(meanPlasticItems_m2=mean(PlasticItems_m2), TotPlasticItems=sum(PlasticItems_m2))
 Yearsummary$totNQuadrats<-table(d$Year)
 
-#mean, SD and Range
+# Mean, SD and Range of items/m2
 mean(d$PlasticItems_m2)
 
 sd(d$PlasticItems_m2)
 
 range(d$PlasticItems_m2)
 
-#number of overall quadrats in each site. 
+# Number of overall quadrats in each site 
 (table(d$Site.Name)) 
-#there must be a typo Millennium drawdock and Millennium Drawdock
-#I will correct it now
+
+# There must be a typo Millennium drawdock and Millennium Drawdock
+# I will correct it now
 d$Site.Name [d$Site.Name=="Millennium drawdock"]<- "Millennium Drawdock"
 
-#dataframe of how many quadrats for each site
+# Dataframe of how many quadrats for each site
 quadsite<-as.data.frame(table(droplevels(d$Site.Name)))
-quadsite #I have a total of 13 sites, some of these places have very few quadrats, 
-        #like Millwall 4 and  Bermondsey 6, both sampled just one day 
+quadsite 
+#I have a total of 12 sites, some of these places have very few quadrats, 
+        #like Millwall and  Bermondsey, both sampled just one day, we will keep this in mind
 
-#now I am creating two dataframea of summary per year and sites, one with mean items per quadrats and the other with tot
+# Now I am creating two dataframe of summary per year and sites, 
+# one with TOT items/m2
 Summarysum<-aggregate(d[c(75)], by=list(Category=d$Site.Name,d$Year), FUN=sum)%>% rename(Site.Name=Category, Year=Group.2)
-
+# one with MEAN items/m2 
 Summarymean<-aggregate(d[c(75)], by=list(Category=d$Site.Name,d$Year), FUN=mean)%>% rename(Site.Name=Category, Year=Group.2)
-#calcolating the sd for the second table
+# Calculating the SD 
 Summarysd<-aggregate(d[c(75)], by=list(Category=d$Site.Name,d$Year), FUN=sd)%>% rename(Site.Name=Category, Year=Group.2, SD=PlasticItems_m2)
 Summarymean<-cbind.data.frame(Summarymean,Summarysd[3])
 
-#visualizing this data
-#first I am arrenging the sites from the one more upstream to the one more downstrem
+#Visualizing these information
+
+# First I am arranging the sites from the one more upstream to the one more downstrem for both tables, Summerysum and Summarymean
 Summarysum$Site.Name.dist <- factor(Summarysum$Site.Name, 
                                     levels=c("","Hammersmith Bridge", "Queen Caroline", 
                                              "Crabtree Wharf", "Church Battersea", "Battersea Bridge", 
@@ -195,22 +209,29 @@ Summarymean$Site.Name.dist <- factor(Summarymean$Site.Name,
                                               "Mast Quay Dock 1", "Erith Marshes")) 
 
 
-#now the barplots
+# Now the barplots
+
+# TOT plastic in each location
 bar1<-ggplot(data=Summarysum, aes(x=Site.Name.dist, y=PlasticItems_m2, fill=Year)) +
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_brewer(palette="Dark2")+
   ggtitle("")+xlab("Site") + ylab("TOT Plastic Items") + scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 
+bar1
+
+# Mean plastic items/m2 in each location
 bar2<-ggplot(data=Summarymean, aes(x=Site.Name.dist, y=PlasticItems_m2, fill=Year)) +
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_brewer(palette="Dark2")+
   ggtitle("")+xlab("Site") + ylab("Mean Plastic Items per quadrat")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))
 
-#in these graphs the sites are ordered from the more distant from the estuary to the one closer.
+bar2
 
-#COMPOSITION by year
-#Now I am looking at the composition per each year (in terms of relative aboundance (item i/tot items *100))
-#dataframe of the composition in 2016
+# in these graphs the sites are ordered from the more distant to the river's mouth to the one closer.
 
+# COMPOSITION by year
+# Now I am looking at the composition per each year (in terms of relative aboundance (item i/tot items *100))
+
+# Dataframe of the composition with relative abundances
 yearcomp<-aggregate(d[c(8:72, 75)], by=list(Category=d$Year), FUN=sum)%>% rename(Year=Category)
 rownames(yearcomp) <- yearcomp[,1]
 RELAByearcomp<-(yearcomp[2:66]/yearcomp$PlasticItems_m2)*100
@@ -218,24 +239,27 @@ RELAByearcomp<-t(RELAByearcomp)
 RELAByearcomp<-as.data.frame(RELAByearcomp)
 RELAByearcomp<-rownames_to_column(RELAByearcomp, var= "Item")
 
-#table for the graph with relative abundances 
+# Table for the graph with relative abundances 
 ggcompyear <- RELAByearcomp %>% 
   tidyr::gather(key = "Year", value = "Abudance", -Item)
 
-#I am goign to exclude from the graph the items that have a relative abundance less than 0.1
+# I am goign to exclude from the graph the items that have a relative abundance less than 0.1 
 sub_ggcompyear<- subset(ggcompyear, Abudance> 0.1)
 
-#Graphs
+# Graphs
 byear<-ggplot(data=sub_ggcompyear, aes(x=reorder(Item,-Abudance), y=Abudance, fill=Year)) +
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_brewer(palette="Dark2")+
   ggtitle("")+xlab("Item") + ylab("Relative abundance")+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
   facet_grid(Year ~ .)
 
 byear
-#ok this big difference in wetwipes might be due to the different sampling effort in sinking sites. I am going to exclude them and see again
+
+# The big difference in wetwipes in 2018 might be due to the different sampling effort in sinking sites. 
+# I am going to exclude them and see again
+
 dfloating<-d%>%filter(Survey.Type=="Floating hotspot")
 
-#now I am doing the same I did before to see the composition, creating the table and plotting it
+# now I am doing the same I did before to see the composition, creating the table and plotting it
 yearcompfloat<-aggregate(dfloating[c(8:72, 75)], by=list(Category=dfloating$Year), FUN=sum)%>% rename(Year=Category)
 rownames(yearcompfloat) <- yearcompfloat[,1]
 RELAByearcompfloat<-(yearcompfloat[2:66]/yearcompfloat$PlasticItems_m2)*100
@@ -243,14 +267,14 @@ RELAByearcompfloat<-t(RELAByearcompfloat)
 RELAByearcompfloat<-as.data.frame(RELAByearcompfloat)
 RELAByearcompfloat<-rownames_to_column(RELAByearcompfloat, var= "Item")
 
-#table for the graph with relative abundances 
+# Table for the graph with relative abundances 
 ggcompyearfloat <- RELAByearcompfloat %>% 
   tidyr::gather(key = "Year", value = "Abudance", -Item)
 
-#I am goign to exclude from the graph the items that have a relative abundance less than 0.1
+# I am goign to exclude from the graph the items that have a relative abundance less than 0.1
 sub_ggcompyearfloat<- subset(ggcompyearfloat, Abudance> 0.1)
 
-#Graphs
+# Graphs
 byearfloat<-ggplot(data=sub_ggcompyearfloat, aes(x=reorder(Item,-Abudance), y=Abudance, fill=Year)) +
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_brewer(palette="Dark2")+
   ggtitle("Composition floating sites")+xlab("Item") + ylab("Relative abundance")+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
@@ -259,13 +283,10 @@ byearfloat<-ggplot(data=sub_ggcompyearfloat, aes(x=reorder(Item,-Abudance), y=Ab
 byearfloat
 
 
-
-
-
 ###A different data frame for each site========================================================================
 
-#now we look in detail at each site
-#they are ordered in the script from the most upstream to the one most downstream
+# Now we look in detail at each site
+# They are ordered in the script from the most upstream to the one most downstream
 
 #Hammersmith Bridge
 Hammersmith<-d%>%filter(Site.Name=="Hammersmith Bridge")
