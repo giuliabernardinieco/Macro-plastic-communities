@@ -13,6 +13,7 @@ if (!require(tibble)) {install.packages('tibble'); library(tibble)}
 if (!require(ggplot2)) {install.packages('ggplot2'); library(ggplot2)}
 if (!require(gridExtra)) {install.packages('gridExtra'); library(gridExtra)}
 if (!require(RColorBrewer)) {install.packages('RColorBrewer'); library(RColorBrewer)}
+if (!require(viridis)) {install.packages('viridis'); library(viridis)}
 if (!require(stringr)) {install.packages('stringr'); library(stringr)}
 if (!require(indicspecies)) {install.packages('indicspecies'); library(indicspecies)}
 if (!require(MASS)) {install.packages('MASS'); library(MASS)}
@@ -29,6 +30,7 @@ if (!require(FSA)) {install.packages('FSA'); library(FSA)}
 if (!require(reshape2)) {install.packages('reshape2'); library(reshape2)}
 if (!require(ggrepel)) {install.packages('ggrepel'); library(ggrepel)}
 if (!require(Kendall)) {install.packages('Kendall'); library(Kendall)}
+
 
 #to view citation: citation(package = "package name")
 
@@ -50,6 +52,7 @@ if (!require(Kendall)) {install.packages('Kendall'); library(Kendall)}
 ### Cleaning the dataset================================================================================
 
 # Importing the dataset
+#data<-read.csv("cleaned-data.csv")
 data<-read.csv("dummy-data.csv") # The original dataset was edited via excel from the raw data obtained by the organisation.
 str(data)                       # I removed by Excel all the object counted that where not made of plastic, such as tins or wood object
 head(data)
@@ -213,14 +216,14 @@ Summarymean$Site.Name.dist <- factor(Summarymean$Site.Name,
 
 # TOT plastic in each location
 bar1<-ggplot(data=Summarysum, aes(x=Site.Name.dist, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_brewer(palette="Dark2")+
+  geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_viridis(discrete=TRUE)+
   ggtitle("")+xlab("Site") + ylab("TOT Plastic Items") + scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
 
 bar1
 
 # Mean plastic items/m2 in each location
 bar2<-ggplot(data=Summarymean, aes(x=Site.Name.dist, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_brewer(palette="Dark2")+
+  geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+scale_fill_viridis(discrete=TRUE)+
   ggtitle("")+xlab("Site") + ylab("Mean Plastic Items per quadrat")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))
 
@@ -589,7 +592,7 @@ plot.Items<-
     ####
     if(randsummary == FALSE){  
       p <- ggplot(df.lower, aes(X1, X2)) + geom_tile(aes(fill = factor(value,levels=c(-1,0,1))), colour ="white") 
-      p <- p + scale_fill_manual(values = c("#D95F02","light gray","#7570B3"), name = "", labels = c("negative","random","positive"),drop=FALSE) + 
+      p <- p + scale_fill_manual(values = c("#FDE725FF","light gray","#440154FF"), name = "", labels = c("negative","random","positive"),drop=FALSE) + 
         theme(axis.text.x = element_blank(),axis.text.y = element_blank(),axis.ticks = element_blank(),plot.title = element_text(vjust=-4,size=20, face="bold"),panel.background = element_rect(fill='white', colour='white'),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = c(0.9, 0.5),legend.text=element_text(size=18)) + 
         #ggtitle("Items Co-occurrence Matrix") + 
         xlab("") + ylab("") + 
@@ -604,7 +607,7 @@ plot.Items<-
     }else{
       
       p <- ggplot(df.lower, aes(X1, X2)) + geom_tile(aes(fill = factor(value,levels=c(-1,0,1,-2))), colour ="white") 
-      p <- p + scale_fill_manual(values = c("#D95F02","light gray","#7570B3","#666666"), name = "", labels = c("negative","random","positive","random"),drop=FALSE) + 
+      p <- p + scale_fill_manual(values = c("#440154FF","light gray","#FDE725FF","#666666"), name = "", labels = c("negative","random","positive","random"),drop=FALSE) + 
         theme(axis.text.x = element_blank(),axis.text.y = element_blank(),axis.ticks = element_blank(),plot.title = element_text(vjust=-4,size=20, face="bold"),panel.background = element_rect(fill='white', colour='white'),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = c(0.9, 0.5),legend.text=element_text(size=18)) + 
         #ggtitle("Items Co-occurrence Matrix") + 
         xlab("") + ylab("") + 
@@ -785,8 +788,8 @@ ggplot() +
   geom_polygon(data=hull.data,aes(x=NMDS1,y=NMDS2,fill=grp,group=grp), alpha=0.30) + # add the convex hulls
   geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5, check_overlap = T) + # add the species labels, this remove all the species that overlap
   geom_point(data=data.scores,aes(x=NMDS1,y=NMDS2,shape=grp,colour=grp),size=4) + # add the point markers
-  scale_colour_manual(values=c("Sinking" = "#66A61E", "Floating" = "#E7298A")) +
-  scale_fill_manual(values=c("Sinking" = "#66A61E", "Floating" = "#E7298A"))+
+  scale_colour_manual(values=c("Sinking" = "#440154FF", "Floating" = "#FDE725FF" )) +
+  scale_fill_manual(values=c("Sinking" = "#440154FF", "Floating" = "#FDE725FF"))+
   coord_equal() +
   theme_bw() + 
   theme(axis.text.x = element_blank(),  # remove x-axis text
@@ -798,7 +801,7 @@ ggplot() +
         panel.grid.major = element_blank(),  #remove major-grid labels
         panel.grid.minor = element_blank(),  #remove minor-grid labels
         plot.background = element_blank())+
-  ggtitle("Plastic Items community composition")
+  ggtitle("Plastic Items community ordination")
  
 #two different ways of dealing with labels overlapping:
 
@@ -869,8 +872,8 @@ dat$type[dat$Site.Name == "Vauxhall Bridge"] <- "Sinking"
 Hplot<-ggplot(dat, aes(x=Site.Name, y=H, fill=type)) + 
   geom_boxplot()+theme_minimal()+ labs(y="H", x = "Site")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   scale_fill_manual(breaks = c("Sinking","Floating"), 
-                    values=c("#E7298A","#66A61E"))+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+theme(legend.position = "none")+
-  ggtitle("Items'Diversity")
+                    values=c("#FDE725FF","#440154FF"))+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+theme(legend.position = "none")+
+  ggtitle("(a) Items Diversity")
 
 # mean, SD and range
 tH1<-na.omit(as.data.frame(tapply(dat$H, dat$Site.Name, mean)))
@@ -944,8 +947,8 @@ dat2$type[dat2$Site.Name == "Vauxhall Bridge"] <- "Sinking"
 Splot<-ggplot(dat2, aes(x=Site.Name, y=Richness, fill=type)) + 
   geom_boxplot()+theme_minimal()+ labs(y="S", x = "Site")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   scale_fill_manual(breaks = c("Sinking","Floating"), 
-                    values=c("#E7298A","#66A61E"))+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
-  ggtitle("Items'Richness")
+                    values=c("#FDE725FF","#440154FF"))+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
+  ggtitle("(b) Items Richness")
 
 #saving the legend of this graph to be used in the combined one
 get_legend<-function(Splot){
@@ -965,12 +968,12 @@ grid.arrange(Hplot,Splot,legend,widths=c(2.3, 2.3, 1), layout_matrix=rbind(c(1,1
 Stype<-ggplot(dat2, aes(x=type, y=Richness, fill=type)) + 
   geom_boxplot()+theme_minimal()+ labs(y="S", x = "Site")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   scale_fill_manual(breaks = c("Sinking","Floating"), 
-                    values=c("#E7298A","#66A61E"))+ggtitle("Items' Richness")+theme(legend.position="none")
+                    values=c("#FDE725FF","#440154FF"))+ggtitle("Items' Richness")+theme(legend.position="none")
 
 Htype<-ggplot(dat, aes(x=type, y=H, fill=type)) + 
   geom_boxplot()+theme_minimal()+ labs(y="S", x = "Site")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   scale_fill_manual(breaks = c("Sinking","Floating"), 
-                    values=c("#E7298A","#66A61E"))+ggtitle("Items' Diversity")+theme(legend.position="none")
+                    values=c("#FDE725FF","#440154FF"))+ggtitle("Items' Diversity")+theme(legend.position="none")
 
 grid.arrange(Htype,Stype,legend,widths=c(2.3, 2.3, 1))
 
@@ -998,9 +1001,9 @@ bsitedf$Site.Name.dist<-factor(bsitedf$Site.Name,
 
 bsite<-  ggplot(data=bsitedf, aes(x=reorder(Item,-Abudance), y=Abudance, fill=type)) +
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+
-  ggtitle("")+xlab("Item") + ylab("Abundance")+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
+  ggtitle("Plastic Items Composition")+xlab("Item") + ylab("Abundance")+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
   facet_wrap(~Site.Name.dist, ncol=2)+ 
-  scale_fill_manual(breaks = c("Sinking","Floating"), values=c("#E7298A","#66A61E"))
+  scale_fill_manual(breaks = c("Sinking","Floating"), values=c("#21908CFF","#440154FF"))
   
 bsite
 
