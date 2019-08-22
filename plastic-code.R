@@ -52,7 +52,9 @@ if (!require(Kendall)) {install.packages('Kendall'); library(Kendall)}
 ### Cleaning the dataset================================================================================
 
 # Importing the dataset
-#data<-read.csv("cleaned-data.csv")
+# data<-read.csv("cleaned-data.csv") # this is the original dataset
+
+#loading the dummy dataset
 data<-read.csv("dummy-data.csv") # The original dataset was edited via excel from the raw data obtained by the organisation.
 str(data)                       # I removed by Excel all the object counted that where not made of plastic, such as tins or wood object
 head(data)
@@ -592,7 +594,7 @@ plot.Items<-
     ####
     if(randsummary == FALSE){  
       p <- ggplot(df.lower, aes(X1, X2)) + geom_tile(aes(fill = factor(value,levels=c(-1,0,1))), colour ="white") 
-      p <- p + scale_fill_manual(values = c("#FDE725FF","light gray","#440154FF"), name = "", labels = c("negative","random","positive"),drop=FALSE) + 
+      p <- p + scale_fill_manual(values = c("#21908CFF","light gray","#440154FF"), name = "", labels = c("negative","random","positive"),drop=FALSE) + 
         theme(axis.text.x = element_blank(),axis.text.y = element_blank(),axis.ticks = element_blank(),plot.title = element_text(vjust=-4,size=20, face="bold"),panel.background = element_rect(fill='white', colour='white'),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = c(0.9, 0.5),legend.text=element_text(size=18)) + 
         #ggtitle("Items Co-occurrence Matrix") + 
         xlab("") + ylab("") + 
@@ -607,7 +609,7 @@ plot.Items<-
     }else{
       
       p <- ggplot(df.lower, aes(X1, X2)) + geom_tile(aes(fill = factor(value,levels=c(-1,0,1,-2))), colour ="white") 
-      p <- p + scale_fill_manual(values = c("#440154FF","light gray","#FDE725FF","#666666"), name = "", labels = c("negative","random","positive","random"),drop=FALSE) + 
+      p <- p + scale_fill_manual(values = c("#440154FF","light gray","#21908CFF","#666666"), name = "", labels = c("negative","random","positive","random"),drop=FALSE) + 
         theme(axis.text.x = element_blank(),axis.text.y = element_blank(),axis.ticks = element_blank(),plot.title = element_text(vjust=-4,size=20, face="bold"),panel.background = element_rect(fill='white', colour='white'),panel.grid.major = element_blank(), panel.grid.minor = element_blank(),legend.position = c(0.9, 0.5),legend.text=element_text(size=18)) + 
         #ggtitle("Items Co-occurrence Matrix") + 
         xlab("") + ylab("") + 
@@ -756,7 +758,7 @@ NMDSdata<-merge(NMDSdata,sitestable, by="Var1")
 
 # Bootstrapping and testing for an actual difference between the groups with adonis (vegan package)
 # adonis allows to perform permutational multivariate analysis of variance using distance matrices 
-fit <- adonis(RELABcommunity ~ Site.type, data=NMDSdata, permutations=1000, method="bray")
+fit <- adonis(RELABcommunity ~ Site.type, data=NMDSdata, permutations=999, method="bray")
 fit #our groups in the real dataset are very different from eachother, it is significant
 
 ## Adonis works by first finding the centroids for each group and then calculates the squared deviations 
@@ -966,16 +968,16 @@ grid.arrange(Hplot,Splot,legend,widths=c(2.3, 2.3, 1), layout_matrix=rbind(c(1,1
 
 # boxplot for sinking and floating in general
 Stype<-ggplot(dat2, aes(x=type, y=Richness, fill=type)) + 
-  geom_boxplot()+theme_minimal()+ labs(y="S", x = "Site")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
+  geom_boxplot()+theme_minimal()+ labs(y="S", x = "Site type")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   scale_fill_manual(breaks = c("Sinking","Floating"), 
-                    values=c("#FDE725FF","#440154FF"))+ggtitle("Items' Richness")+theme(legend.position="none")
+                    values=c("#FDE725FF","#440154FF"))+ggtitle("Items Richness")+theme(legend.position="none")
 
 Htype<-ggplot(dat, aes(x=type, y=H, fill=type)) + 
-  geom_boxplot()+theme_minimal()+ labs(y="S", x = "Site")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
+  geom_boxplot()+theme_minimal()+ labs(y="H", x = "Site type")+ scale_x_discrete(labels = function(x) str_wrap(x, width = 10))+
   scale_fill_manual(breaks = c("Sinking","Floating"), 
-                    values=c("#FDE725FF","#440154FF"))+ggtitle("Items' Diversity")+theme(legend.position="none")
+                    values=c("#FDE725FF","#440154FF"))+ggtitle("Items Diversity")+theme(legend.position="none")
 
-grid.arrange(Htype,Stype,legend,widths=c(2.3, 2.3, 1))
+grid.arrange(Htype,Stype,widths=c(2.3, 2.3))
 
 
 #I am going to look at difference in richness by plotting the composition in a barchar
@@ -988,6 +990,7 @@ bsitedf$type[bsitedf$Site.Name == "Hammersmith Bridge"] <- "Sinking"
 bsitedf$type[bsitedf$Site.Name == "Battersea Bridge"] <- "Sinking"
 bsitedf$type[bsitedf$Site.Name == "Vauxhall Bridge"] <- "Sinking"
 
+bsitedf<-bsitedf%>%filter(Abudance>3) #pruning to have less species and a better graphic representation
 
 #barchart
 bsitedf$Site.Name.dist<-factor(bsitedf$Site.Name, 
@@ -1002,11 +1005,36 @@ bsitedf$Site.Name.dist<-factor(bsitedf$Site.Name,
 bsite<-  ggplot(data=bsitedf, aes(x=reorder(Item,-Abudance), y=Abudance, fill=type)) +
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+
   ggtitle("Plastic Items Composition")+xlab("Item") + ylab("Abundance")+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
-  facet_wrap(~Site.Name.dist, ncol=2)+ 
+  facet_wrap(~Site.Name.dist, ncol = 2)+ 
   scale_fill_manual(breaks = c("Sinking","Floating"), values=c("#21908CFF","#440154FF"))
   
 bsite
 
+#maybe a stack varchart is a better solution
+
+#manipolating this dataframe to group the variables with abundance<3 in another category called "other"
+bf<-bsitedf%>%group_by(Site.Name)%>%summarise(sum=sum(Abudance))
+bf$Abudance<-100-bf$sum
+bf$Item<- "Other"
+bf$sum<-NULL
+bsitedf$type<-NULL
+
+bsitedf<-rbind(bsitedf, bf)
+
+#ordering the sites from the more upstream to the one more downstream
+bsitedf$Site.Name.dist <- factor(bsitedf$Site.Name, 
+                                    levels=c("Hammersmith Bridge", "Queen Caroline", 
+                                             "Crabtree Wharf", "Church Battersea", "Battersea Bridge", 
+                                             "Vauxhall Bridge", "Queenhithe", "Cutty Sark", 
+                                             "Newcastle Drawdock", "Millennium Drawdock")) 
+
+
+#stack barchart
+bsite2<-ggplot(data=bsitedf, aes(x=Site.Name.dist, y=Abudance, fill=Item)) +
+  geom_bar(stat="identity")+scale_fill_viridis(discrete = T)+theme_minimal()+ggtitle("Plastic Items Composition")+xlab("Site") + 
+  ylab("Abundance") + scale_x_discrete(labels = function(x) str_wrap(x, width = 10))
+
+bsite2+theme(legend.position="bottom", legend.box = "horizontal")
 
 # Years: Similarities in diversity and richness between years ========
 
