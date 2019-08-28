@@ -6,7 +6,7 @@ The results and output produced by running plastic-code.R with dummy-data.csv ar
 
 # Instruction on how to run the code
 
-Download plastic-code.R and the dummy-data.csv with the green button "clone or download". Place them in the same working directory on your PC.
+Download plastic-code.R and the dummy-data.csv with the green button "clone or download" and then on "Download ZIP". Extract the files from the "Macro-plastic-communities-master.zip". Place them in the same working directory on your PC.
 In the plastic-code.R, on line 7, set your working directory with the folder where you have stored dummy-data.csv and plastic-code.R
 
 plastic-code.R is divided in sections and it is commented throughout
