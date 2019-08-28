@@ -4,7 +4,8 @@ rm(list=ls())
 
 # Working directory
 getwd()
-setwd("C:/Users/Giulia/Desktop/Imperial MSc/projects/plastic/data/Git")
+# set your working directory as instructions in README.md
+setwd("C:/Users/Giulia/Macro-plastic-communities-master") 
 
 # Required packages
 if (!require(dplyr)) {install.packages('dplyr'); library(dplyr)}
@@ -67,7 +68,7 @@ d<-d1[,-c(4:15)]
 
 # Trying to keep the R environment cleaner as possible removing dataframes I do not need anymore
 rm(d1, data)  # Be aware that this command will give you an error "Error in names(frame) <- `*vtmp*` : names() applied to a non-vector" 
-              # if and only if the View(data) tab is still open in Rstudio.
+              # if and only the View(data) tab is still open in Rstudio.
 
 
 # Deleting only-wet wipes observation and quadrats not surveyed
@@ -196,7 +197,7 @@ Summarymean<-aggregate(d[c(75)], by=list(Category=d$Site.Name,d$Year), FUN=mean)
 Summarysd<-aggregate(d[c(75)], by=list(Category=d$Site.Name,d$Year), FUN=sd)%>% rename(Site.Name=Category, Year=Group.2, SD=PlasticItems_m2)
 Summarymean<-cbind.data.frame(Summarymean,Summarysd[3])
 
-#Visualizing these information
+#Visualizing this information
 
 # First I am arranging the sites from the one more upstream to the one more downstrem for both tables, Summerysum and Summarymean
 Summarysum$Site.Name.dist <- factor(Summarysum$Site.Name, 
@@ -302,9 +303,6 @@ table(droplevels(Hammersmith$Recorded..Date))
 Hammersmith<-Hammersmith%>%filter( Recorded..Date !="01/04/2017")
 #eliminating this also from the full data d
 d<-d%>%filter( Recorded..Date !="01/04/2017")
-#plot
-ggplot(data=Hammersmith, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Hammersmith Bridge")
 
 #mean, range and sd
 mean(Hammersmith$PlasticItems_m2[Hammersmith$Year=="2018"])
@@ -318,9 +316,6 @@ table(droplevels(QueenCaroline$Recorded..Date))
 #30 diferent days of sampling across three years
 #10 in the 2016, 11 in the 2017, 12 in the 2018.
 
-ggplot(data=QueenCaroline, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Queen Caroline")
-
 #mean, range and sd
 mean(QueenCaroline$PlasticItems_m2[QueenCaroline$Year=="2018"])
 sd(QueenCaroline$PlasticItems_m2[QueenCaroline$Year=="2018"])
@@ -332,9 +327,6 @@ CrabtreeWharf<-d%>%filter(Site.Name=="Crabtree Wharf")
 #this site has 114 quadrats
 table(droplevels(CrabtreeWharf$Recorded..Date))
 #14 different days of sampling across three years
-
-ggplot(data=CrabtreeWharf, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Crabtree Wharf")
 
 #mean, range and sd
 mean(CrabtreeWharf$PlasticItems_m2[CrabtreeWharf$Year=="2016"])
@@ -348,17 +340,11 @@ ChurchBattersea<-d%>%filter(Site.Name=="Church Battersea")
 table(droplevels(ChurchBattersea$Recorded..Date))
 #8 days but no data from 2016
 
-ggplot(data=ChurchBattersea, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Church Battersea")
-
 #Battersea Bridge
 Battersea<-d%>%filter(Site.Name=="Battersea Bridge")
 #this site has 40 quadrats
 table(droplevels(Battersea$Recorded..Date))
 #only one day in 2016
-
-ggplot(data=Battersea, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Battersea Bridge")
 
 
 #Vauxhall Bridge
@@ -367,17 +353,12 @@ Vauxhall<-d%>%filter(Site.Name=="Vauxhall Bridge")
 table(droplevels(Vauxhall$Recorded..Date))
 #only one day in 2016
 
-ggplot(data=Vauxhall, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Vauxhall Bridge")
-
 #Queenhithe
 Queenhithe<-d%>%filter(Site.Name=="Queenhithe")  
 #this site has 39 quadrats
 table(droplevels(Queenhithe$Recorded..Date))
 #6 days no data from 2018
 
-ggplot(data=Queenhithe, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Queenhithe")
 
 #Bermondsey
 Bermondsey<-d%>%filter(Site.Name=="Bermondsey")
@@ -385,8 +366,6 @@ Bermondsey<-d%>%filter(Site.Name=="Bermondsey")
 table(droplevels(Bermondsey$Recorded..Date))
 #only one day in 2016
 
-ggplot(data=Bermondsey, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Bermondsey")
 
 #Millwall Drawdock
 Millwall<-d%>%filter(Site.Name=="Millwall Drawdock")
@@ -394,8 +373,6 @@ Millwall<-d%>%filter(Site.Name=="Millwall Drawdock")
 table(droplevels(Millwall$Recorded..Date))
 #only one day in 2017
 
-ggplot(data=Millwall, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Millwall Drawdock")
 
 #Cutty Sark
 CuttySark<-d%>%filter(Site.Name=="Cutty Sark")
@@ -404,17 +381,11 @@ table(droplevels(CuttySark$Recorded..Date))
 #25 days of data
 table(CuttySark$Year)
 
-ggplot(data=CuttySark, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Cutty Sark")
-
 #Newcastle Drawdock
 Newcastle<-d%>%filter(Site.Name=="Newcastle Drawdock")
 #this site has 18 quadrats
 table(droplevels(Newcastle$Recorded..Date))
 # 3 day of data from 2016
-
-ggplot(data=Newcastle, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Newcastle")
 
 #Millennium Drawdock
 Millennium<-d%>%filter(Site.Name=="Millennium Drawdock") 
@@ -422,14 +393,13 @@ Millennium<-d%>%filter(Site.Name=="Millennium Drawdock")
 table(droplevels(Millennium$Recorded..Date))
 #only one day of data from 2016
 
-ggplot(data=Millennium, aes(x=Year, y=PlasticItems_m2, fill=Year)) +
-  geom_bar(stat="identity")+theme_minimal()+scale_fill_brewer(palette="Dark2")+ggtitle("Millennium")
 
-#Millwall Drawdock and Bermondsey has respectevely 6 and 4 quadrats and where sampled just once each, I can not consider them rapresentatiive of the site, so I want to try to exclude them
+
+# Millwall Drawdock and Bermondsey has respectevely 6 and 4 quadrats and where sampled just once each, I can not consider them rapresentatiive of the site, so I want to try to exclude them
 
 d<-d%>%filter(Site.Name!="Bermondsey")%>%filter(Site.Name!="Millwall Drawdock")
 
-#trying to keep the encionment tidy
+# trying to keep the encionment tidy
 rm(Millennium, Newcastle, CuttySark, Millwall, Bermondsey, Queenhithe, Vauxhall, Battersea, ChurchBattersea, CrabtreeWharf, QueenCaroline, Hammersmith)
 
 ###Co-occurance of items==========================================================================================
@@ -728,7 +698,7 @@ RELABcommunity<-(RELABcommunity[2:66]/RELABcommunity$PlasticItems_m2)*100
 RELABcommunity
 # Bray-Curtis dissimilarity matrix
 bc2<-vegdist(RELABcommunity, method="bray", binary=FALSE) 
-bc2 #Bray-Curtis dissimilarity matrix
+bc2 # Bray-Curtis dissimilarity matrix
 
 bc3<-as.data.frame(as.matrix(bc2))
 # now I want to create a hierarchical clustering where the most similar are close together 
@@ -805,7 +775,7 @@ ggplot() +
         plot.background = element_blank())+
   ggtitle("Plastic Items community ordination")
  
-#two different ways of dealing with labels overlapping:
+# two different ways of dealing with labels overlapping:
 
 #geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5, check_overlap = T) +  
 #geom_text_repel(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species), alpha=0.5) + 
@@ -990,29 +960,24 @@ bsitedf$type[bsitedf$Site.Name == "Hammersmith Bridge"] <- "Sinking"
 bsitedf$type[bsitedf$Site.Name == "Battersea Bridge"] <- "Sinking"
 bsitedf$type[bsitedf$Site.Name == "Vauxhall Bridge"] <- "Sinking"
 
-bsitedf<-bsitedf%>%filter(Abudance>3) #pruning to have less species and a better graphic representation
+bsitedf<-bsitedf%>%filter(Abudance>3) #pruning to have less species and a better graphic representation, 
+                                      #we are removing species that have relative abundance<3
+
+
 
 #barchart
-bsitedf$Site.Name.dist<-factor(bsitedf$Site.Name, 
-       levels=c("Queen Caroline", "Hammersmith Bridge", 
-                "Crabtree Wharf", "Battersea Bridge", 
-                "Church Battersea", "Vauxhall Bridge",
-                "Queenhithe", "Newcastle Drawdock", 
-                "Cutty Sark",  
-                "Millennium Drawdock"))
 
-
-bsite<-  ggplot(data=bsitedf, aes(x=reorder(Item,-Abudance), y=Abudance, fill=type)) +
+bsite<- ggplot(data=bsitedf, aes(x=reorder(Item,-Abudance), y=Abudance, fill=type)) +
   geom_bar(stat="identity", position=position_dodge(preserve = "single"))+theme_minimal()+
   ggtitle("Plastic Items Composition")+xlab("Item") + ylab("Abundance")+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
-  facet_wrap(~Site.Name.dist, ncol = 2)+ 
+  facet_wrap(~Site.Name, ncol = 2)+ 
   scale_fill_manual(breaks = c("Sinking","Floating"), values=c("#21908CFF","#440154FF"))
   
 bsite
 
-#maybe a stack varchart is a better solution
+# maybe a stack barchart is a better solution
 
-#manipolating this dataframe to group the variables with abundance<3 in another category called "other"
+# manipolating this dataframe to group the variables with  relative abundance<3 in another category called "other"
 bf<-bsitedf%>%group_by(Site.Name)%>%summarise(sum=sum(Abudance))
 bf$Abudance<-100-bf$sum
 bf$Item<- "Other"
@@ -1215,9 +1180,9 @@ mm<-lmer(PlasticItems_m2~day+(1|Site.Name), data=LMMdata)
 summary(mm) 
 
 #checking assumption of normality of residual
-shapiro.test(residuals(mm))#not notmal,I am going to see at the plots
+shapiro.test(residuals(mm))#not exacly normal,I am going to see at the plots (in the real dataset)
 plot(mm)
-qqplot(LMMdata$day,LMMdata$PlasticItems_m2)#not so bad, accetable
+qqplot(LMMdata$day,LMMdata$PlasticItems_m2)#not so bad, accetable (in the real dataset)
 
 #mm reduced
 mm.red<-lmer(PlasticItems_m2~1+(1|Site.Name), data=LMMdata)
