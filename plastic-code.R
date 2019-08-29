@@ -1,4 +1,3 @@
-
 # House keeping
 rm(list=ls())
 
@@ -44,10 +43,10 @@ if (!require(Kendall)) {install.packages('Kendall'); library(Kendall)}
 #BUT
 
 # because the data is owned by the organisation the data used with this R script on github (dummy-data.csv) 
-# is a mock dataset generated through R and the confidential information are chnaged or removed. 
+# is a mock dataset generated through R and the confidential information are changed or removed. 
 # Hence, the results obtained by running this R script with dummy-data.csv are not representative of the reality.
 # the comments about results or statistical analyses are related to the original data and results and they might 
-# not be meaninful with the dummy-data
+# not be meaningful with the dummy-data
 
 
 ### Cleaning the dataset================================================================================
@@ -57,7 +56,7 @@ if (!require(Kendall)) {install.packages('Kendall'); library(Kendall)}
 
 #loading the dummy dataset
 data<-read.csv("dummy-data.csv") # The original dataset was edited via excel from the raw data obtained by the organisation.
-str(data)                       # I removed by Excel all the object counted that where not made of plastic, such as tins or wood object
+str(data)                       # I removed by Excel all the object counted that were not made of plastic, such as tins or wood object
 head(data)
 tail(data)
 # View(data)  # To open the dataset in a new tab
@@ -66,18 +65,18 @@ tail(data)
 d1<-data[,-c(2:9)]
 d<-d1[,-c(4:15)]
 
-# Trying to keep the R environment cleaner as possible removing dataframes I do not need anymore
+# Trying to keep the R environment cleaner as possible removing data frames I do not need anymore
 rm(d1, data)  # Be aware that this command will give you an error "Error in names(frame) <- `*vtmp*` : names() applied to a non-vector" 
-              # if and only the View(data) tab is still open in Rstudio.
+# if and only the View(data) tab is still open in Rstudio.
 
 
 # Deleting only-wet wipes observation and quadrats not surveyed
 d<-d%>%filter(Other.litter!="No wet wipes; other litter not included in survey")%>%filter(Other.litter!="Only wet wipes surveyed")%>%filter(Other.litter!="No wet wipes present")%>%filter(Surveyed.!="Not surveyed", Surveyed.!="No litter")
 
-# Originally the organisation instead of using 0 used empty cells so now I am changing NA to 0
+# Originally the organization instead of using 0 used empty cells so now I am changing NA to 0
 d[is.na(d)]<-0
 
-# Creating a new variable Plastic Items per m2 that will sum all the plastic items present in a quadrat (1 m2 of surface)
+# Creating a new variable Plastic Items per m2 that will sum all the plastic items present in a quadrat (1 m2 of area)
 d$PlasticItems_m2<-apply(d[,8:79], 1, sum)
 
 
@@ -88,20 +87,20 @@ d$Year<-substring(d$Year,7,10)
 # Plastictems per m2 per years
 boxplot(d$PlasticItems_m2~d$Year)
 
-# We decided we don't want to use data collected in 2015 because it was a pilot study and of low quality data collection 
+# We decided we don't want to use data collected in 2015 because it was a pilot study and of low-quality data collection 
 d<-filter(d, Year!=2015)
 
 # Top items in the river
 topitems<-as.data.frame(apply(d[8:79], 2, FUN=sum))
 
 # I am going to remove items not present (in the original dataset):
-  # Other.polystyrene.food.packaging
-  # Commercial.fishing.gear
-  # Shopping.trolley
-  # Tyre
-  # Large.appliance..fridge..washing.machine....
-  # Small.appliance..toaster..microwave....
-  # Mattress
+# Other.polystyrene.food.packaging
+# Commercial.fishing.gear
+# Shopping.trolley
+# Tyre
+# Large.appliance..fridge..washing.machine....
+# Small.appliance..toaster..microwave....
+# Mattress
 d$Other.polystyrene.food.packaging<-NULL
 d$Commercial.fishing.gear<-NULL
 d$Shopping.trolley<-NULL
@@ -161,7 +160,7 @@ colnames(d)[colnames(d)=="Packaging.peanut"] <- "Peanut.pack"
 
 ###First glance at the data =====================================================================================================
 
-# How many quasrats per year?
+# How many quadrats per year?
 # How may plastic Items per year?
 # Mean of plastic Items per m2 per each year?
 
@@ -186,7 +185,7 @@ d$Site.Name [d$Site.Name=="Millennium drawdock"]<- "Millennium Drawdock"
 quadsite<-as.data.frame(table(droplevels(d$Site.Name)))
 quadsite 
 #I have a total of 12 sites, some of these places have very few quadrats, 
-        #like Millwall and  Bermondsey, both sampled just one day, we will keep this in mind
+#like Millwall and  Bermondsey, both sampled just one day, we will keep this in mind
 
 # Now I am creating two dataframe of summary per year and sites, 
 # one with TOT items/m2
@@ -215,7 +214,7 @@ Summarymean$Site.Name.dist <- factor(Summarymean$Site.Name,
                                               "Mast Quay Dock 1", "Erith Marshes")) 
 
 
-# Now the barplots
+# Now the bar plots
 
 # TOT plastic in each location
 bar1<-ggplot(data=Summarysum, aes(x=Site.Name.dist, y=PlasticItems_m2, fill=Year)) +
@@ -235,7 +234,7 @@ bar2
 # in these graphs the sites are ordered from the more distant to the river's mouth to the one closer.
 
 # COMPOSITION by year
-# Now I am looking at the composition per each year (in terms of relative aboundance (item i/tot items *100))
+# Now I am looking at the composition per each year (in terms of relative abundance (item i/tot items *100))
 
 # Dataframe of the composition with relative abundances
 yearcomp<-aggregate(d[c(8:72, 75)], by=list(Category=d$Year), FUN=sum)%>% rename(Year=Category)
@@ -249,7 +248,7 @@ RELAByearcomp<-rownames_to_column(RELAByearcomp, var= "Item")
 ggcompyear <- RELAByearcomp %>% 
   tidyr::gather(key = "Year", value = "Abudance", -Item)
 
-# I am goign to exclude from the graph the items that have a relative abundance less than 0.1 
+# I am going to exclude from the graph the items that have a relative abundance less than 0.1 
 sub_ggcompyear<- subset(ggcompyear, Abudance> 0.1)
 
 # Graphs
@@ -260,7 +259,7 @@ byear<-ggplot(data=sub_ggcompyear, aes(x=reorder(Item,-Abudance), y=Abudance, fi
 
 byear
 
-# The big difference in wetwipes in 2018 might be due to the different sampling effort in sinking sites. 
+# The big difference in wet wipes in 2018 might be due to the different sampling effort in sinking sites. 
 # I am going to exclude them and see again
 
 dfloating<-d%>%filter(Survey.Type=="Floating hotspot")
@@ -277,7 +276,7 @@ RELAByearcompfloat<-rownames_to_column(RELAByearcompfloat, var= "Item")
 ggcompyearfloat <- RELAByearcompfloat %>% 
   tidyr::gather(key = "Year", value = "Abudance", -Item)
 
-# I am goign to exclude from the graph the items that have a relative abundance less than 0.1
+# I am going to exclude from the graph the items that have a relative abundance less than 0.1
 sub_ggcompyearfloat<- subset(ggcompyearfloat, Abudance> 0.1)
 
 # Graphs
@@ -298,7 +297,7 @@ byearfloat
 Hammersmith<-d%>%filter(Site.Name=="Hammersmith Bridge") 
 #this site has a total of 45 quadrats, 
 table(droplevels(Hammersmith$Recorded..Date))
-#3 days, but one day in 2017 has only one quadrat, this is an error, it was actually a quadrat where only wet wipes were sampled.
+#3 days, but one day in 2017 has only one quadrat, this is an error, it was a quadrat where only wet wipes were sampled.
 #I am going to remove this
 Hammersmith<-Hammersmith%>%filter( Recorded..Date !="01/04/2017")
 #eliminating this also from the full data d
@@ -395,11 +394,11 @@ table(droplevels(Millennium$Recorded..Date))
 
 
 
-# Millwall Drawdock and Bermondsey has respectevely 6 and 4 quadrats and where sampled just once each, I can not consider them rapresentatiive of the site, so I want to try to exclude them
+# Millwall Drawdock and Bermondsey has respectively 6 and 4 quadrats and were sampled just once each, I can not consider them representative of the site, so I want to try to exclude them
 
 d<-d%>%filter(Site.Name!="Bermondsey")%>%filter(Site.Name!="Millwall Drawdock")
 
-# trying to keep the encionment tidy
+# trying to keep the environment tidy
 rm(Millennium, Newcastle, CuttySark, Millwall, Bermondsey, Queenhithe, Vauxhall, Battersea, ChurchBattersea, CrabtreeWharf, QueenCaroline, Hammersmith)
 
 ###Co-occurance of items==========================================================================================
@@ -427,7 +426,7 @@ prob.table(cooccur.items)
 dev.off() 
 plot(cooccur.items)
 
-#I want to chnage colors of the graphs, but it is a funcion of the package so I have found the 
+#I want to change colors of the graphs, but it is a function of the package so I have found the 
 # code of the function on https://github.com/cran/cooccur/blob/master/R/plot.cooccur.R and changed 
 # the colors using my palette and hiding the title
 
@@ -571,10 +570,10 @@ plot.Items<-
         scale_x_discrete(limits=meas, expand = c(0.3, 0),drop=FALSE) + 
         scale_y_discrete(limits=meas, expand = c(0.3, 0),drop=FALSE) 
       p <- p + geom_text(data=dfids,aes(label=X1),hjust=1,vjust=0,angle = -22.5)#, color="dark gray")
-        
-        
-        
-    
+      
+      
+      
+      
       
     }else{
       
@@ -613,7 +612,7 @@ pair(mod = cooccur.items, " C.bud.stick")
 # now we looked at the percentage of each species total pairings that were classified as positive, negative, and random (columns with prefix "num" are counts)
 pair.attributes(cooccur.items)
 pair.profile(cooccur.items) #Boxplot showing the percent of total pairings for each species that are positive,
-                            #negative, or random. Species are ordered by increasing number of total associations
+#negative, or random. Species are ordered by increasing number of total associations
 
 # now I want to compare expected vs observed
 cooccur(mat = TransposeCom, type = "spp_site", thresh = FALSE,
@@ -623,9 +622,9 @@ cooccur(mat = TransposeCom, type = "spp_site", thresh = FALSE,
 obs.v.exp(cooccur.items)# there are more positive relationship that expected.
 
 
-#In general from this section about co-occurance of items I would say that there are a lots of items cooccuring together. 
-#This is important because in this ways we know that there are certain Items alsways present with others. 
-#But, this might be also due to the fact that our sites are very similars in terms of species composition.
+#In general from this section about co-occurrence of items I would say that there are lots of items cooccurring together. 
+#This is important because in this ways we know that there are certain Items always present with others. 
+#But, this might be also because our sites are very similar in terms of species composition.
 
 ##looking at the co-occurance of some items
 pair(mod = cooccur.items, "Stirrer") 
@@ -679,18 +678,18 @@ sitestable$type<-NULL
 # Similarity and significant clusters through a Bray-Curtis matrix for sites
 
 # The first thing to do is to create a dissimilarity matrix with Bray-Curtis index (if 1, they don't share any species)
-# First I am going to use the matrix community that has aboundaces for three years and each rows is a site
-community # community matrix with aboundance and every row is a location
+# First I am going to use the matrix community that has abundances for three years and each row is a site
+community # community matrix with abundance and every row is a location
 sitestable
-# For community compute the distances among the rows (sites):
+# For community computes the distances among the rows (sites):
 bc<-vegdist(community, method="bray", binary=FALSE) #binary=FALSE means you look at the number of individuals.  TRUE would give the result for presence-absence (Sorenson's index)
 bc
 
 # Many analyses are sensitive to absolute abundance in a sample and can skew results, one solution for this is 
 # to take absolute abundance data and convert it to relative abundance estimates
 
-# Moreover, the prblem about using Community  is that locations has heterogeneous number of quadrats, some where sampled much more than others, 
-# to overcome this I am going to use relative percentage instead.
+# Moreover, the problem about using Community  is that locations have a heterogeneous number of quadrats, some were sampled much more than others, 
+# to overcome this I am going to use the relative percentage instead.
 RELABcommunity<-aggregate(d[c(8:72,75)], by=list(Category=d$Site.Name), FUN=sum)
 rownames(RELABcommunity) <- RELABcommunity[,1]
 RELABcommunity<-(RELABcommunity[2:66]/RELABcommunity$PlasticItems_m2)*100
@@ -705,8 +704,8 @@ bc3<-as.data.frame(as.matrix(bc2))
 clu<- hclust(bc2, method = "average")
 plot(clu, main="Dendrogram of sites similarities")
 
-# now I want to test the significance of the clusters, using the pvclust function I create the cluster direcly from the community matrix 
-# instead of the BC dissimilarity matrix. It use bootstraping and the result might differ
+# now I want to test the significance of the clusters, using the pvclust function I create the cluster directly from the community matrix 
+# instead of the BC dissimilarity matrix. It uses bootstrapping and the result might differ
 clu2<-pvclust(t(RELABcommunity), method.hclust ="average" )
 plot(clu2)
 pvrect(clu2, alpha = 0.95)
@@ -720,16 +719,16 @@ pvpick(clu2)
 bc2.nmds<-metaMDS(RELABcommunity, distance = "bray", k=2) 
 
 #checking the stress
-bc2.nmds$stress #very good value with the real dataset
+bc2.nmds$stress #very good value with the real dataset (0.034)
 
 # creating dataframe to be used to see the different groups and test with bootstraping
 NMDSdata<-rownames_to_column(RELABcommunity, var = "Var1")
 NMDSdata<-merge(NMDSdata,sitestable, by="Var1")
 
 # Bootstrapping and testing for an actual difference between the groups with adonis (vegan package)
-# adonis allows to perform permutational multivariate analysis of variance using distance matrices 
+# adonis allows performing permutational multivariate analysis of variance using distance matrices 
 fit <- adonis(RELABcommunity ~ Site.type, data=NMDSdata, permutations=999, method="bray")
-fit #our groups in the real dataset are very different from eachother, it is significant
+fit #our groups in the real dataset are very different from each other, it is significant
 
 ## Adonis works by first finding the centroids for each group and then calculates the squared deviations 
 # of each of site to that centroid. Then significance tests are performed using F-tests based on sequential 
@@ -774,14 +773,14 @@ ggplot() +
         panel.grid.minor = element_blank(),  #remove minor-grid labels
         plot.background = element_blank())+
   ggtitle("Plastic Items community ordination")
- 
+
 # two different ways of dealing with labels overlapping:
 
 #geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5, check_overlap = T) +  
 #geom_text_repel(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species), alpha=0.5) + 
 
 
-# Sites: Shannon Diversity Index and anova for sites====
+# Sites: Shannon Diversity Index and ANOVA for sites====
 
 
 # I am starting creating a community dataframe to make comparison using replicated samples. 
@@ -800,12 +799,12 @@ sub$occurrences <- NULL
 rownames(sub)=sub$ID
 sub$ID<-NULL
 
-# Now I am creating a matrix with the shannon index for every sample.
+# Now I am creating a matrix with the Shannon index for every sample.
 H=diversity(comm, index="shannon")
 dat=data.frame(H=H, Site.Name=sub$Site.Name, Recorded..Date=sub$Recorded..Date)
 dat
 
-#I have to escludes sites with less than 2 repeated measure because I cannot compare them with ANOVA
+#I have to exclude sites with less than 2 repeated measure because I cannot compare them with ANOVA
 #these are:
 #Battersea Bridge
 #Bermondsey
@@ -828,11 +827,11 @@ KWH
 
 # post-hoc test using Dunn's test to see significant pairs
 dunnTest(H~Site.Name, data=datred, method="bh") 
-# the only site that differ with significance (p<0.05) from all the other is Hammersmith, 
+# the only site that differs with significance (p<0.05) from all the other is Hammersmith, 
 # the pair Queen Caroline-Cutty Sark is also different
 
 
-# boxplot to visualise the situation, take into accout that heigher values of H means heigher diversity
+# boxplot to visualise the situation, take into account that higher values of H mean higher diversity
 
 # creating  a new variable to hightlight differences
 dat$type=ifelse(dat$Site.Name==c("Newcastle Drawdock"),"Sinking","Floating")
@@ -859,9 +858,9 @@ tH<-merge(tH1, tH2, by="row.names", all=F)
 tH<-merge(tH, tH3, by="Row.names", all=F)
 
 
-# Sites: Richness and anova per sites=====
-# Shannon diversity index can be very criticise, for this reason I will do a similar analysis using the richness.
-# calculating richness for each transects
+# Sites: Richness and ANOVA per sites=====
+# Shannon diversity index can be very criticised, for this reason, I will do a similar analysis using the richness.
+# calculating richness for each transect
 
 Richness<-as.data.frame(apply(comm>0,1,sum))
 colnames(Richness)[colnames(Richness)=="apply(comm > 0, 1, sum)"] <- "Richness"
@@ -870,7 +869,7 @@ colnames(Richness)[colnames(Richness)=="apply(comm > 0, 1, sum)"] <- "Richness"
 dat2=data.frame(Richness=Richness, Site.Name=sub$Site.Name, Recorded..Date=sub$Recorded..Date)
 dat2
 
-# I have to escludes sites with less than 2 repeated measure because I cannot compare them with an anova,
+# I have to exclude sites with less than 2 repeated measure because I cannot compare them with an ANOVA,
 # they don't have variance
 #these are:
 #Battersea Bridge
@@ -928,7 +927,7 @@ get_legend<-function(Splot){
   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
   legend <- tmp$grobs[[leg]]
   return(legend)
-  }
+}
 legend <- get_legend(Splot)
 # removing the legend from Splot
 Splot <- Splot + theme(legend.position="none")
@@ -950,7 +949,7 @@ Htype<-ggplot(dat, aes(x=type, y=H, fill=type)) +
 grid.arrange(Htype,Stype,widths=c(2.3, 2.3))
 
 
-#I am going to look at difference in richness by plotting the composition in a barchar
+#I am going to look at the difference in richness by plotting the composition in a bar chart
 
 bsitedf<-as.data.frame(t(RELABcommunity))
 bsitedf<-rownames_to_column(bsitedf, var= "Item")
@@ -960,8 +959,8 @@ bsitedf$type[bsitedf$Site.Name == "Hammersmith Bridge"] <- "Sinking"
 bsitedf$type[bsitedf$Site.Name == "Battersea Bridge"] <- "Sinking"
 bsitedf$type[bsitedf$Site.Name == "Vauxhall Bridge"] <- "Sinking"
 
-bsitedf<-bsitedf%>%filter(Abudance>3) #pruning to have less species and a better graphic representation, 
-                                      #we are removing species that have relative abundance<3
+bsitedf<-bsitedf%>%filter(Abudance>3) #pruning to have fewer species and better graphic representation, 
+#we are removing species that have relative abundance<3
 
 
 
@@ -972,10 +971,10 @@ bsite<- ggplot(data=bsitedf, aes(x=reorder(Item,-Abudance), y=Abudance, fill=typ
   ggtitle("Plastic Items Composition")+xlab("Item") + ylab("Abundance")+theme(axis.text.x = element_text(angle = 90, hjust=0.95,vjust=0.2))+
   facet_wrap(~Site.Name, ncol = 2)+ 
   scale_fill_manual(breaks = c("Sinking","Floating"), values=c("#21908CFF","#440154FF"))
-  
+
 bsite
 
-# maybe a stack barchart is a better solution
+# maybe a stack bar chart is a better solution
 
 # manipolating this dataframe to group the variables with  relative abundance<3 in another category called "other"
 bf<-bsitedf%>%group_by(Site.Name)%>%summarise(sum=sum(Abudance))
@@ -988,10 +987,10 @@ bsitedf<-rbind(bsitedf, bf)
 
 #ordering the sites from the more upstream to the one more downstream
 bsitedf$Site.Name.dist <- factor(bsitedf$Site.Name, 
-                                    levels=c("Hammersmith Bridge", "Queen Caroline", 
-                                             "Crabtree Wharf", "Church Battersea", "Battersea Bridge", 
-                                             "Vauxhall Bridge", "Queenhithe", "Cutty Sark", 
-                                             "Newcastle Drawdock", "Millennium Drawdock")) 
+                                 levels=c("Hammersmith Bridge", "Queen Caroline", 
+                                          "Crabtree Wharf", "Church Battersea", "Battersea Bridge", 
+                                          "Vauxhall Bridge", "Queenhithe", "Cutty Sark", 
+                                          "Newcastle Drawdock", "Millennium Drawdock")) 
 
 
 #stack barchart
@@ -1013,9 +1012,9 @@ bcyears<-vegdist(SummaryyearsRELAB, method="bray", binary=FALSE)
 bcyears #they are very similar
 
 # now I want to see if they are indeed equal using Anova with replicated samples
-# I am using the same dat table that I have used for comparing the sites,but now I am grouping for time instead of sites
+# I am using the same dat table that I have used for comparing the sites, but now I am grouping for time instead of sites
 dat
-# I am going to add a coloumn with the year
+# I am going to add a column with the year
 dat$Year<-dat$Recorded..Date
 dat$Year<-substring(dat$Year,7,10)
 
@@ -1026,20 +1025,20 @@ shapiro.test(dat$H)
 # Kruskal-Wallis test
 dat$Year <- as.factor(dat$Year)#otherwise the k-w test is not working
 KW=kruskal.test(dat$H,dat$Year)
-KW #difference in H in the two years, mainly because the wetwipes and the different sampling effort in Hammersmith
+KW #difference in H in the two years, mainly because of the wet wipes and the different sampling effort in Hammersmith
 
 #performing Dunn's test to see the pairs
 dunnTest(H~ Year, data=dat, method="bh")
-#2018 is different from the others years in H
+#2018 is different from the other years in H
 
-#boxplot to visualise the situation, take into accout that heigher values of H means heigher diversity
+#boxplot to visualise the situation, take into account that higher values of H mean higher diversity
 ggplot(dat, aes(x=Year, y=H)) + 
   geom_boxplot()+theme_minimal()+ labs(y="Shannon diversity index, H", x = "year")
 
 
 
 ###Only floating
-# now I want to see if for the floating sites only there is a differences between years
+# now I want to see if for the floating sites only there is a difference between years
 datf<-dat%>%filter(type=="Floating")
 
 # test the normality
@@ -1050,7 +1049,7 @@ datf$Year <- as.factor(datf$Year)#otherwise the k-w test is not working
 KWf=kruskal.test(datf$H,datf$Year)
 KWf #no difference ij H in the two years
 
-#boxplot to visualise the situation, take into accout that heigher values of H means heigher diversity
+#boxplot to visualise the situation, take into account that higher values of H mean higher diversity
 ggplot(datf, aes(x=Year, y=H)) + 
   geom_boxplot()+theme_minimal()+ labs(y="Shannon diversity index, H", x = "year")
 
@@ -1059,10 +1058,10 @@ ggplot(datf, aes(x=Year, y=H)) +
 #Let's see how the richness changed during these years
 
 # I want to see if they are indeed equal using Anova with replicated samples
-# I am using the same dat table that I have used for comparing the sites,but now I am grouping for time instead of sites
+# I am using the same dat table that I have used for comparing the sites, but now I am grouping for time instead of sites
 dat2
 
-# I am going to add a coloumn with the year
+# I am going to add a column with the year
 dat2$Year<-dat2$Recorded..Date
 dat2$Year<-substring(dat2$Year,7,10)
 
@@ -1073,13 +1072,13 @@ shapiro.test(dat2$Richness)
 # Kruskal-Wallis test
 dat2$Year <- as.factor(dat2$Year)#otherwise the k-w test is not working
 KW2=kruskal.test(dat2$Richness,dat2$Year)
-KW2 #difference in R in the two years, mainly because the wetwipes and the different sampling effort in Hammersmith
+KW2 #difference in R in the two years, mainly because the wet wipes and the different sampling effort in Hammersmith
 
 #performing Dunn's test to see the pairs
 bipbip=dunnTest(Richness~ Year, data=dat2, method="bh")
 #only 2018-2017 are significantly different
 
-#boxplot to visualise the situation, take into accout that heigher values of H means heigher diversity
+#boxplot to visualise the situation, take into account that higher values of S means higher richness
 ggplot(dat2, aes(x=Year, y=Richness)) + 
   geom_boxplot()+theme_minimal()+ labs(y="Richness", x = "year")
 
@@ -1099,7 +1098,7 @@ plot(HaovRich2f)
 TukeyHSD(HaovRich2f)
 plot(TukeyHSD(HaovRich2f)) #2018 is slighly different in richness in 2018 than 2017
 
-# boxplot to visualise the situation, take into accout that heigher values of H means heigher diversity
+# boxplot to visualise the situation, take into account that higher values of H means higher diversity
 ggplot(dat2f, aes(x=Year, y=Richness)) + 
   geom_boxplot()+theme_minimal()+ labs(y="Richness", x = "year")
 
@@ -1153,11 +1152,11 @@ indvalori$sign
 
 ###Linear mixed model to see changes in tot aboundance thought time=====================================================
 
-# I want to test changes in total abbundance of plastic items throught time. 
+# I want to test changes in the total abundance of plastic items through time. 
 # because I have a lot of heterogeneity on where the data were sampled across time and space I am going to overcome
 # this problem considering site as random effects 
 
-# moreover, beacuse each years they have different numbers of quadrats to overcome this problem I am going
+# Moreover, because each year they have different numbers of quadrats to overcome this problem I am going
 # to use abundance data, this means I am using the tot num items/ tot num quadrat
 # so I am testing if there was a reduction in the abundance of plastic per m2
 
@@ -1180,9 +1179,9 @@ mm<-lmer(PlasticItems_m2~day+(1|Site.Name), data=LMMdata)
 summary(mm) 
 
 #checking assumption of normality of residual
-shapiro.test(residuals(mm))#not exacly normal,I am going to see at the plots (in the real dataset)
+shapiro.test(residuals(mm))#not exactly normal,I am going to see at the plots (in the real dataset)
 plot(mm)
-qqplot(LMMdata$day,LMMdata$PlasticItems_m2)#not so bad, accetable (in the real dataset)
+qqplot(LMMdata$day,LMMdata$PlasticItems_m2)#not so bad, acceptable (in the real dataset)
 
 #mm reduced
 mm.red<-lmer(PlasticItems_m2~1+(1|Site.Name), data=LMMdata)
@@ -1191,18 +1190,18 @@ summary(mm.red)
 #test the models
 anova(mm.red,mm)
 
-#from this anova we can see that the two models are not significant diferent, this means that the effectd day does not explaing much of the 
-#variation and we cannot conclude that there in no significative changese in the plastic items amount 
+#from this ANOVA we can see that the two models are not significantly different, this means that the effect day does not explain much of the 
+#variation and we cannot conclude that there is no significative changes in the amount of the plastic items 
 
 
 #many might argue that it is better to use Mann-Kendall test
-#mann kendall test
+#Mann-Kendall test
 
 MKpp1<-SeasonalMannKendall(as.ts(LMMdata$PlasticItems_m2))
 summary(MKpp1)
 
-#this test has as assumption that there is not bias data. Our data are most likely biased and pseudoreplicated, 
-#for this reason I do not think that this test is the best to use. The LMM allows to correct the pseudoreplication of the sites. 
+#This test has the assumption that there is not bias data. Our data are most likely biased and pseudoreplicated, 
+# for this reason, I do not think that this test is the best to use. The LMM allows to correct the pseudoreplication of the sites. 
 #anyway the result of the M-K is not significant and the tau is positive, all of this is coherent with the results of the LMM
-#Moreover, M-K is a non-parametic test, and our data are sliglty skewed. 
-#The LMM diagnostic plots are accetable and the LMM is considered more powerful because it take into consideration the pseudoreplication.
+#Moreover, M-K is a non-parametric test, and our data are slightly skewed. 
+#The LMM diagnostic plots are acceptable and the LMM is considered more powerful because it takes into consideration the pseudoreplication.
